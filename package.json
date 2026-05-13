@@ -1,0 +1,30 @@
+{
+  "name": "lumens-lab",
+  "version": "0.1.0",
+  "description": "End-to-end test harness for Stellar — payments, DEX, and Soroban scenarios",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "test:scenarios": "ts-node src/scenarios/run-all.ts"
+  },
+  "keywords": ["stellar", "e2e", "testing", "soroban", "dex"],
+  "license": "MIT",
+  "dependencies": {
+    "@stellar/stellar-sdk": "12.3.0"
+  },
+  "devDependencies": {
+    "@types/jest": "29.5.12",
+    "@types/node": "20.14.0",
+    "jest": "29.7.0",
+    "ts-jest": "29.1.5",
+    "ts-node": "10.9.2",
+    "typescript": "5.4.5"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "testMatch": ["**/tests/**/*.test.ts"]
+  }
+}
