@@ -16,7 +16,10 @@ describe("DEX scenario", () => {
   let USDC: Asset;
 
   beforeAll(async () => {
-    trader = await net.fundAccount();
+    [trader] = await Promise.all([
+      net.fundAccount(),
+      net.fundAccount(usdcIssuer), // issuer must exist on-chain before a trustline can reference it
+    ]);
     USDC = new Asset("USDC", usdcIssuer.publicKey());
 
     // Establish trustline for USDC
@@ -30,6 +33,20 @@ describe("DEX scenario", () => {
       .build();
     tx.sign(trader);
     await withRetry(() => net.server.submitTransaction(tx));
+
+    // Issuer sends USDC to trader so the sell offer has balance to work with
+    const issuerAccount = await net.loadAccount(usdcIssuer.publicKey());
+    const fundTx = new TransactionBuilder(issuerAccount, {
+      fee: BASE_FEE,
+      networkPassphrase: net.config.networkPassphrase,
+    })
+      .addOperation(
+        Operation.payment({ destination: trader.publicKey(), asset: USDC, amount: "100" })
+      )
+      .setTimeout(30)
+      .build();
+    fundTx.sign(usdcIssuer);
+    await withRetry(() => net.server.submitTransaction(fundTx));
   }, 30_000);
 
   it("places a buy offer (XLM → USDC)", async () => {
@@ -63,7 +80,7 @@ describe("DEX scenario", () => {
         Operation.manageSellOffer({
           selling: USDC,
           buying: Asset.native(),
-          amount: "0",   // 0 = cancel/no-op if no balance; valid for scaffold
+          amount: "1",
           price: "10",
         })
       )
