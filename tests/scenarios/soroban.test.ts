@@ -4,9 +4,8 @@ import {
   Operation,
   BASE_FEE,
   SorobanRpc,
-  Contract,
+  Address,
   nativeToScVal,
-  xdr,
 } from "@stellar/stellar-sdk";
 import { TestNetwork, FUTURENET } from "../../src/network";
 import { withRetry } from "../../src/utils";
@@ -63,12 +62,7 @@ describe("Soroban scenario", () => {
     })
       .addOperation(
         Operation.createCustomContract({
-          address: new xdr.ScAddress({
-            type: xdr.ScAddressType.scAddressTypeAccount(),
-            accountId: xdr.AccountID.publicKeyTypeEd25519(
-              caller.rawPublicKey()
-            ),
-          }),
+          address: new Address(caller.publicKey()),
           wasmHash: Buffer.from(placeholderWasmHash, "hex"),
         })
       )
